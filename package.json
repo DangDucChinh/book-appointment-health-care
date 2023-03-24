@@ -1,11 +1,33 @@
 {
-  "name": "book-appointment-health-care",
+  "name": "nodejs",
   "version": "1.0.0",
-  "description": "Application used to book appointment with a doctor for issue health",
-  "main": "index.js",
+  "description": "backend nodejs hoiDanIT",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node src/server.js"
   },
-  "author": "Đặng Đức Chính",
-  "license": "ISC"
+  "keywords": [
+    "fullstack",
+    "nodejs",
+    "express",
+    "hoiDanIT"
+  ],
+  "author": "Eric HoiDanIT",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.29.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/node": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "nodemon": "^2.0.7",
+    "sequelize-cli": "^6.2.0"
+  }
 }
