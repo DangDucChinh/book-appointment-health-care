@@ -2,11 +2,16 @@ import express from "express";
 import bodyParser from "body-parser";
 import viewEngine from "./config/viewEngine";
 import initWebRoutes from './routes/web';
-import connectDB from "./config/connectDB"; 
+import connectDB from "./config/connectDB";
+import cors from 'cors';
+
 require('dotenv').config();
 
 let app = express();
-
+app.use(cors({
+    credentials : true,
+    origin : true
+}));
 //config app
 
 app.use(bodyParser.json());

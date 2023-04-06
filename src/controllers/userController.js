@@ -34,7 +34,30 @@ let getLogin = async(req ,res)=>{
     return res.render('apilogin.ejs');
 }
 
+let handleGetAllUser = async(req, res)=>{
+    let id  = req.body.id ; // ALL , ID; 
+    if(!id){
+        return res.status(200).json({
+            errCode  : 1 , 
+            message  :'Có lỗi ko có id được truyền từ frontend vào server , được viết trên uesrController', 
+            users : []
+        });
+    }
+    
+    let users = await userService.getAllUser(id);
+    return res.status(200).json({
+        errCode  : 0 , 
+        message  :'Đã lấy được user dựa theo id hoặc theo all', 
+        users : users
+    });
+}   
+
 module.exports = {
     handleLogin : handleLogin ,
-    getLogin : getLogin
+    getLogin : getLogin, 
+    handleGetAllUser  :handleGetAllUser
 }
+
+// controller chỉ có nhiệm vụ đó là phục vụ các tác nhân get/post trong web.js 
+// chúng được dùng để nhận và trả ra các tham số cần thiết 
+// còn logic thực sự để bên service làm 
