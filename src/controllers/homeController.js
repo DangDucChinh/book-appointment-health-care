@@ -17,9 +17,9 @@ let getAboutPage = (req, res) => {
 }
 
 let postUser = async(req, res) => {
-    const salt = await bcryptjs.genSalt(10);
-
+    let salt = await bcryptjs.genSalt(10);
     let passHashed = await bcryptjs.hash(req.body.password , salt);
+    
     await db.User.create({
         firstName : req.body.firstName , 
         lastName : req.body.lastName , 

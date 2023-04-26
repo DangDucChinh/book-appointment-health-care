@@ -1,14 +1,11 @@
 import bcryptjs from 'bcryptjs';
 import db from '../models/index';
-let handleUserLogin = async (email, password) => {
 
-    // Xử lí thử trường hợp không có cả email và password 
+
+let handleUserLogin = async (email, password) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let userData = {
-                errCode: 3,
-                errMessage: 'Ko có email, ko có pass hoặc ko có cả 2!'
-            };
+            let userData = {};
 
             let isExit = await checkUserEmail(email);
             if (isExit) { // nếu hàm trả về true 
@@ -20,7 +17,7 @@ let handleUserLogin = async (email, password) => {
 
                 let check = await bcryptjs.compareSync(password, user.password);
                 if (check) {
-                    userData.errMessage = 'Email có và pass cũng trùng';
+                    userData.errMessage = 'Email trùng và pass trùng !'
                     userData.errCode = 0;
                     delete user.password;
                     userData.user = user;
@@ -67,18 +64,18 @@ let getAllUser = (userId) => {
             let users = '';
             if (userId === 'ALL') {
                 users = await db.User.findAll({
-                    attributes:{
-                        exclude :['password']
+                    attributes: {
+                        exclude: ['password']
                     }
                 });
             }
-            if(userId && userId !== 'ALL'){
+            if (userId && userId !== 'ALL') {
                 users = await db.User.findOne({
                     where: {
                         id: userId
                     },
-                    attributes:{
-                        exclude :['password']
+                    attributes: {
+                        exclude: ['password']
                     }
                 });
             }
@@ -93,7 +90,154 @@ let getAllUser = (userId) => {
 
 
 
+let createNewUser = async (newdata) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let userData = {};
+            let isExit = await checkUserEmail(newdata.email);
+
+            if (isExit) { // nếu hàm trả về true 
+                userData.message = 'Please check email or enter other email , email existed in database!!!';
+                userData.errCode = 1;
+            } else {
+                let salt = await bcryptjs.genSalt(10); // generate a salt with cost factor of 10
+                let hasedPassword = await bcryptjs.hash(newdata.password, salt);
+
+                await db.User.create({
+                    firstName: newdata.firstName,
+                    lastName: newdata.lastName,
+                    email: newdata.email,
+                    password: hasedPassword,
+                    address: newdata.address,
+                    phoneNumber: newdata.phoneNumber,
+                    gender: newdata.gender === '1' ? true : false,
+                    roleId: newdata.roleId
+                });
+
+
+                userData.message = 'Create success the new user from react form!!!';
+                userData.errCode = 0;
+            }
+
+            resolve(userData);
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
+let deleteUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let errCodeMess = {};
+            console.log("API : " + userId);
+            let user = await db.User.findOne({
+                where: {
+                    id: userId
+                },
+                raw: true
+            });
+
+
+            if (!user) {
+                errCodeMess.errCode = 0,
+                    errCodeMess.message = 'Ko tồn tại email !!!!';
+            } else {
+
+                await db.User.destroy({
+                    where: {
+                        id: userId
+                    }
+                });
+
+                errCodeMess.errCode = 0,
+                    errCodeMess.message = 'Delete succesfully!';
+            }
+
+            resolve(errCodeMess);
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+let updateUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let errCodeMess = {};
+            let user = await db.User.findOne({
+                where: {
+                    id: userId
+                },
+                raw: true
+            });// raw = true là chuyển đổi dữ liệu lấy đc từ database biến thành json, chứ ko giữ instance của sequelize
+
+            console.log(user);
+            if (!user) {
+                errCodeMess.message = `loi ko tim thay user id : ${userId} de update`;
+                errCodeMess.errCode = 0
+                // thành công nhưng mà ko thấy user 
+            } else {
+                await db.User.update(
+                    {
+                        firstName: 'CCCC',
+                        lastName: 'YDHD',
+                        phoneNumber: '00000000000'
+                    },
+                    { where: { id: userId } }
+                );
+
+                errCodeMess.message = `Đã update thành công id : ${userId}`;
+                errCodeMess.errCode = 0;
+            }
+
+            resolve(errCodeMess);
+        } catch (err) {
+            reject(err);
+        };
+    });
+}
+
+let getAllCodes = (typeInput) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let response = {};
+            if (!typeInput) {
+                response.errCode = 1;
+                response.message = 'Lỗi query tham số truyền vào ko có !';
+            } else {
+                let allcodes = await db.Allcode.findAll({
+                    where: {
+                        type: typeInput
+                        // typeInput là khi đăng nhập, chúng ta giữ type của người đó (admin, doctor , patient ), khi chạy hàm này 
+                        // typeInput tương ứng tài khoản nào thì lấy ra data type đó . 
+                    }
+                });
+
+                if (allcodes.length === 0) {
+                    response.errCode = 0;
+                    response.message = 'Vào được database lấy allcode nhưng type ko có kiểu đó !';
+                } else {
+                    response.errCode = 0;
+                    response.message = 'Thành công lấy được data allcodes';
+                    response.dataAllCodes = allcodes;
+                }
+            }
+
+            resolve(response);
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
 module.exports = {
     handleUserLogin: handleUserLogin,
-    getAllUser: getAllUser
+    getAllUser: getAllUser,
+    createNewUser: createNewUser,
+    deleteUser: deleteUser,
+    updateUser: updateUser,
+    getAllCodes: getAllCodes
 }
