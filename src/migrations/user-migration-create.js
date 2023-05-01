@@ -19,7 +19,7 @@ module.exports = {
       },
       password: { type: Sequelize.STRING },
       gender: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.STRING
       },
       address: {
         type: Sequelize.STRING

@@ -10,7 +10,7 @@ let handleUserLogin = async (email, password) => {
             let isExit = await checkUserEmail(email);
             if (isExit) { // nếu hàm trả về true 
                 var user = await db.User.findOne({
-                    attributes: ['email', 'password', 'roleId'],
+                    attributes: ['email', 'password', 'roleId','firstName', 'lastName'],
                     where: { email: email },
                     raw: true
                 });
@@ -21,6 +21,7 @@ let handleUserLogin = async (email, password) => {
                     userData.errCode = 0;
                     delete user.password;
                     userData.user = user;
+
                 } else {
                     userData.errMessage = 'Lỗi pass rồi . email thì có mà pas thì ko ';
                     userData.errCode = 2;
@@ -80,7 +81,7 @@ let getAllUser = (userId) => {
                 });
             }
 
-            console.log(users);
+            // console.log(users);
             resolve(users);
         } catch (err) {
             reject(err);
@@ -110,8 +111,10 @@ let createNewUser = async (newdata) => {
                     password: hasedPassword,
                     address: newdata.address,
                     phoneNumber: newdata.phoneNumber,
-                    gender: newdata.gender === '1' ? true : false,
-                    roleId: newdata.roleId
+                    gender: newdata.gender , 
+                    roleId: newdata.roleId , 
+                    positionId : newdata.positionId , 
+                    // image : newdata.image
                 });
 
 
@@ -130,7 +133,7 @@ let deleteUser = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let errCodeMess = {};
-            console.log("API : " + userId);
+            // console.log("API : " + userId);
             let user = await db.User.findOne({
                 where: {
                     id: userId
@@ -172,7 +175,7 @@ let updateUser = (userId) => {
                 raw: true
             });// raw = true là chuyển đổi dữ liệu lấy đc từ database biến thành json, chứ ko giữ instance của sequelize
 
-            console.log(user);
+            // console.log(user);
             if (!user) {
                 errCodeMess.message = `loi ko tim thay user id : ${userId} de update`;
                 errCodeMess.errCode = 0
@@ -197,8 +200,8 @@ let updateUser = (userId) => {
         };
     });
 }
-
-let getAllCodes = (typeInput) => {
+    
+let getAllCodes = (typeInput) => { // console.log(typeInput)
     return new Promise(async (resolve, reject) => {
         try {
             let response = {};
