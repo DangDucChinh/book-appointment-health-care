@@ -10,7 +10,7 @@ let handleUserLogin = async (email, password) => {
             let isExit = await checkUserEmail(email);
             if (isExit) { // nếu hàm trả về true 
                 var user = await db.User.findOne({
-                    attributes: ['email', 'password', 'roleId','firstName', 'lastName'],
+                    attributes: ['email', 'password', 'roleId', 'firstName', 'lastName'],
                     where: { email: email },
                     raw: true
                 });
@@ -69,8 +69,7 @@ let getAllUser = (userId) => {
                         exclude: ['password']
                     }
                 });
-            }
-            if (userId && userId !== 'ALL') {
+            } else if (userId && userId !== 'ALL') {
                 users = await db.User.findOne({
                     where: {
                         id: userId
@@ -81,7 +80,7 @@ let getAllUser = (userId) => {
                 });
             }
 
-            // console.log(users);
+
             resolve(users);
         } catch (err) {
             reject(err);
@@ -111,9 +110,9 @@ let createNewUser = async (newdata) => {
                     password: hasedPassword,
                     address: newdata.address,
                     phoneNumber: newdata.phoneNumber,
-                    gender: newdata.gender , 
-                    roleId: newdata.roleId , 
-                    positionId : newdata.positionId , 
+                    gender: newdata.gender,
+                    roleId: newdata.roleId,
+                    positionId: newdata.positionId,
                     // image : newdata.image
                 });
 
@@ -133,7 +132,6 @@ let deleteUser = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let errCodeMess = {};
-            // console.log("API : " + userId);
             let user = await db.User.findOne({
                 where: {
                     id: userId
@@ -173,9 +171,7 @@ let updateUser = (userId) => {
                     id: userId
                 },
                 raw: true
-            });// raw = true là chuyển đổi dữ liệu lấy đc từ database biến thành json, chứ ko giữ instance của sequelize
-
-            // console.log(user);
+            });
             if (!user) {
                 errCodeMess.message = `loi ko tim thay user id : ${userId} de update`;
                 errCodeMess.errCode = 0
@@ -200,7 +196,52 @@ let updateUser = (userId) => {
         };
     });
 }
-    
+
+let updateUserAPIGetUser = (userFromObjReqBody) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let errCodeMess = {};
+            if (!userFromObjReqBody.id || !userFromObjReqBody.roleId || !userFromObjReqBody.positionId || !userFromObjReqBody.gender) {
+                errCodeMess.errCode = 2;
+                errCodeMess.message = 'Ko thay id , hoac role , hoac gender';
+                resolve(errCodeMess);
+            }
+            let userGettedFromMySQL = await db.User.findOne({
+                where: {
+                    id: userFromObjReqBody.id
+                },
+                raw: true
+            });
+            if (!userGettedFromMySQL) {
+                errCodeMess.errCode = 0;
+                errCodeMess.message = `Ko the tim thay user tu mysql mac du da nhan dc : ${userFromObjReqBody.firstName}  truyen vao`;
+
+                resolve(errCodeMess);
+            } else {
+                await await db.User.update(
+                    {
+                        firstName: userFromObjReqBody.firstNam,
+                        lastName: userFromObjReqBody.lastName,
+                        address: userFromObjReqBody.address,
+                        gender: userFromObjReqBody.gender,
+                        positionId: userFromObjReqBody.positionId,
+                        roleId: userFromObjReqBody.roleId,
+                        phoneNumber: userFromObjReqBody.phoneNumber,
+                    },
+                    { where: { id: userFromObjReqBody.id } }
+                );
+
+                errCodeMess.errCode = 0;
+                errCodeMess.message = 'Thành công update user này';
+
+                resolve(errCodeMess);
+            }
+        } catch (error) {
+            reject("Loi tai server , phan userService , let updateUserByAPI : ", error);
+        }
+    });
+};
+
 let getAllCodes = (typeInput) => { // console.log(typeInput)
     return new Promise(async (resolve, reject) => {
         try {
@@ -242,5 +283,6 @@ module.exports = {
     createNewUser: createNewUser,
     deleteUser: deleteUser,
     updateUser: updateUser,
-    getAllCodes: getAllCodes
+    getAllCodes: getAllCodes,
+    updateUserAPIGetUser: updateUserAPIGetUser
 }

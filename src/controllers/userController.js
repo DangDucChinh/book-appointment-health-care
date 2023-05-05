@@ -62,13 +62,22 @@ let handleDelete = async(req, res)=>{
     });
 }
 
+// let handleUpdate = async(req, res)=>{
+//     let errCodeMess = await userService.updateUser(req.params.id);
+//     return res.status(200).json({
+//         message : errCodeMess.message, 
+//         errCode : errCodeMess.errCode
+//     });
+// };
+
 let handleUpdate = async(req, res)=>{
-    let errCodeMess = await userService.updateUser(req.params.id);
+    let errCodeMess = await userService.updateUserAPIGetUser(req.body);
     return res.status(200).json({
         message : errCodeMess.message, 
         errCode : errCodeMess.errCode
     });
 };
+
 
 
 let handleGetAllCodes = async(req, res)=>{ // bắt đầu viết chỉn chu hơn
