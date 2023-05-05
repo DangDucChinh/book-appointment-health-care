@@ -113,7 +113,7 @@ let createNewUser = async (newdata) => {
                     gender: newdata.gender,
                     roleId: newdata.roleId,
                     positionId: newdata.positionId,
-                    // image : newdata.image
+                    image: newdata.avatar
                 });
 
 
@@ -218,18 +218,34 @@ let updateUserAPIGetUser = (userFromObjReqBody) => {
 
                 resolve(errCodeMess);
             } else {
-                await await db.User.update(
-                    {
-                        firstName: userFromObjReqBody.firstNam,
-                        lastName: userFromObjReqBody.lastName,
-                        address: userFromObjReqBody.address,
-                        gender: userFromObjReqBody.gender,
-                        positionId: userFromObjReqBody.positionId,
-                        roleId: userFromObjReqBody.roleId,
-                        phoneNumber: userFromObjReqBody.phoneNumber,
-                    },
-                    { where: { id: userFromObjReqBody.id } }
-                );
+                if (!userFromObjReqBody.avatar) {
+                    await db.User.update(
+                        {
+                            firstName: userFromObjReqBody.firstNam,
+                            lastName: userFromObjReqBody.lastName,
+                            address: userFromObjReqBody.address,
+                            gender: userFromObjReqBody.gender,
+                            positionId: userFromObjReqBody.positionId,
+                            roleId: userFromObjReqBody.roleId,
+                            phoneNumber: userFromObjReqBody.phoneNumber,
+                        },
+                        { where: { id: userFromObjReqBody.id } }
+                    );
+                } else {
+                    await db.User.update(
+                        {
+                            firstName: userFromObjReqBody.firstNam,
+                            lastName: userFromObjReqBody.lastName,
+                            address: userFromObjReqBody.address,
+                            gender: userFromObjReqBody.gender,
+                            positionId: userFromObjReqBody.positionId,
+                            roleId: userFromObjReqBody.roleId,
+                            phoneNumber: userFromObjReqBody.phoneNumber,
+                            image : userFromObjReqBody.avatar
+                        },
+                        { where: { id: userFromObjReqBody.id } }
+                    );
+                }
 
                 errCodeMess.errCode = 0;
                 errCodeMess.message = 'Thành công update user này';
