@@ -1,7 +1,7 @@
 import express from "express";
 import homeController from "../controllers/homeController";
 import userController from "../controllers/userController";
-import bcryptjs from 'bcryptjs';
+import doctorController from "../controllers/doctorController";
 
 
 let router = express.Router();
@@ -23,6 +23,12 @@ let initWebRoutes = (app) => {
 
     /// api
     router.get('/api/get-all-codes', userController.handleGetAllCodes);
+
+
+    // api doctor at home-page 
+    router.get('/api/top-doctor-home', doctorController.handleGetTopDoctorHome);
+    router.get('/api/get-all-doctor', doctorController.handleGetAllDoctor);
+    router.post('/api/save-infor-doctor', doctorController.handleSaveInforDoctor);
 
     return app.use("/", router);
 }

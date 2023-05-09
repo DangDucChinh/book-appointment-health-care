@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) { // định danh các mối quan hệ , vd 1 bác sĩ có thể thuộc nhiều phòng khám . 
       // define association here
+      User.belongsTo(models.Allcode, {foreignKey: 'positionId', targetKey: 'keyMap',as : 'positionData'});
+      User.belongsTo(models.Allcode, {foreignKey: 'gender', targetKey: 'keyMap', as : 'genderData'});
     }
   };
   User.init({
