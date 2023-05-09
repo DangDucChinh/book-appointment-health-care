@@ -85,8 +85,54 @@ let saveInforDoctor = async (inputData) => {
     });
 }
 
+export const getDetailDoctorById = (idFromRequestQueryId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!idFromRequestQueryId) {
+                resolve({
+                    errCode: 1,
+                    message: 'Ko truyền đủ  tham số, ở đây là req.query.id'
+                });
+            } else {
+                let doctorFromDBById = await db.User.findOne({
+                    where: {
+                        id: idFromRequestQueryId
+                    },
+                    attributes: {
+                        exclude: ['password', 'image']
+                    },
+                    include: [
+                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
+                        { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+                    ],
+                    raw: true,
+                    nest: true,
+                });
+
+                if (!doctorFromDBById) {
+                    resolve({
+                        errCode: 0,
+                        message: 'Đã nhận id nhưng ko tìm thấy user này trong data , id có khả năng ko có trong data'
+                    })
+                } else {
+                    resolve({
+                        errCode: 0,
+                        message: `Tìm thấy doctor tại id  ${idFromRequestQueryId}`,
+                        data: doctorFromDBById
+                    });
+                }
+            }
+        } catch (error) {
+            console.log("Lỗi tại doctor service", error);
+            reject(error);
+        }
+    });
+}
+
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctor: getAllDoctor,
-    saveInforDoctor: saveInforDoctor
+    saveInforDoctor: saveInforDoctor,
+    getDetailDoctorById: getDetailDoctorById
 }

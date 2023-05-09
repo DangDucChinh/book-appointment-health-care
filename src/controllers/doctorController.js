@@ -46,9 +46,22 @@ let handleSaveInforDoctor = async(req, res)=>{
     }
 }
 
+let handleGetDetailDoctorById = async (req, res) =>{
+    try {
+        let response = await doctorService.getDetailDoctorById(req.query.id) ; 
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm getDetailDoctor by ID trong file doctorController trên server!'
+        });
+    }
+}
+
 
 module.exports = {
     handleGetTopDoctorHome : handleGetTopDoctorHome , 
     handleGetAllDoctor : handleGetAllDoctor , 
-    handleSaveInforDoctor : handleSaveInforDoctor
+    handleSaveInforDoctor : handleSaveInforDoctor , 
+    handleGetDetailDoctorById : handleGetDetailDoctorById
 }
