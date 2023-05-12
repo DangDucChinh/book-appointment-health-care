@@ -58,10 +58,24 @@ let handleGetDetailDoctorById = async (req, res) =>{
     }
 }
 
+let handleBulkCreateSchedule = async (req, res) =>{
+    try {
+        let response = await doctorService.bulkCreateSchedule(req.body) ; 
+        return res.status(200).json(response);
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm handleBulkCreateScheduletrong file doctorController trên server!'
+        });
+    }
+}
+
 
 module.exports = {
     handleGetTopDoctorHome : handleGetTopDoctorHome , 
     handleGetAllDoctor : handleGetAllDoctor , 
     handleSaveInforDoctor : handleSaveInforDoctor , 
-    handleGetDetailDoctorById : handleGetDetailDoctorById
+    handleGetDetailDoctorById : handleGetDetailDoctorById , 
+    handleBulkCreateSchedule : handleBulkCreateSchedule
 }
