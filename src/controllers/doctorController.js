@@ -71,11 +71,40 @@ let handleBulkCreateSchedule = async (req, res) =>{
     }
 }
 
+let handleGetScheduleDoctorByDate = async(req, res) => {
+    try{
+        let response = await doctorService.getScheduleDoctorByDate(req.query.doctorId, req.query.date);
+        // nhận hai tham số trên query 
+        return res.status(200).json(response);
+    }catch(error){
+        console.log(error);
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm handleGetScheduleDoctorByDate file doctorController trên server!'
+        });
+    }
+}
+
+let handleGetExtraInforDoctorById = async(req, res) => {
+    try{
+        let response = await doctorService.getExtraInforDoctorById(req.query.doctorId);
+        return res.status(200).json(response);
+    }catch(error){
+        console.log(error);
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm handleGetExtraInforDoctorById file doctorController trên server!'
+        });
+    }
+}
+
 
 module.exports = {
     handleGetTopDoctorHome : handleGetTopDoctorHome , 
     handleGetAllDoctor : handleGetAllDoctor , 
     handleSaveInforDoctor : handleSaveInforDoctor , 
     handleGetDetailDoctorById : handleGetDetailDoctorById , 
-    handleBulkCreateSchedule : handleBulkCreateSchedule
+    handleBulkCreateSchedule : handleBulkCreateSchedule,
+    handleGetScheduleDoctorByDate : handleGetScheduleDoctorByDate , 
+    handleGetExtraInforDoctorById  :handleGetExtraInforDoctorById
 }

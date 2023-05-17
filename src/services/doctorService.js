@@ -64,12 +64,16 @@ let getAllDoctor = () => {
 let saveInforDoctor = async (inputData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!inputData.doctorId || !inputData.contentHTML || !inputData.contentMarkdown || !inputData.action) {
+            if (!inputData.doctorId || !inputData.contentHTML || !inputData.contentMarkdown || !inputData.action
+                || !inputData.selectedPrice || !inputData.selectedPayment || !inputData.selectedProvince
+                || !inputData.nameClinic || !inputData.addressClinic) {
                 resolve({
                     message: "Ko truyền đủ tham số : doctorId ,contentHTML hoặc contentMarkdown",
                     errCode: 1
                 });
             } else {
+
+                // update-insert to mardown
                 if (inputData.action === 'CREATE') {
                     await db.Markdown.create({
                         doctorId: inputData.doctorId,
@@ -77,14 +81,8 @@ let saveInforDoctor = async (inputData) => {
                         contentMarkdown: inputData.contentMarkdown,
                         description: inputData.description
                     });
-
-                    resolve({
-                        message: "Khởi tạo markdown thành công ",
-                        errCode: 0
-                    });
-
                 } else if (inputData.action === 'EDIT') {
-                    let doctorMarkdown = await db.Markdown.update({
+                    await db.Markdown.update({
                         contentHTML: inputData.contentHTML,
                         contentMarkdown: inputData.contentMarkdown,
                         description: inputData.description,
@@ -94,13 +92,49 @@ let saveInforDoctor = async (inputData) => {
                             doctorId: inputData.doctorId
                         },
                     });
-
-                    resolve({
-                        message: "Chỉnh sửa markdown thành công",
-                        errCode: 0
-                    });
                 }
 
+                ///
+                // update - insert beside markdown 
+                let doctorInfor = await db.Doctor_Infor.findOne({
+                    where: {
+                        doctorId: inputData.doctorId
+                    },
+                    raw: false
+                });
+
+                if (doctorInfor) {
+                    //update 
+                    await db.Doctor_Infor.update({
+                        doctorId: inputData.doctorId,
+                        priceId: inputData.selectedPrice,
+                        provinceId: inputData.selectedProvince,
+                        paymentId: inputData.selectedPayment,
+                        nameClinic: inputData.nameClinic,
+                        addressClinic: inputData.addressClinic,
+                        note: inputData.note ? inputData.note : '',
+                        updateAt: new Date()
+                    }, {
+                        where: {
+                            doctorId: inputData.doctorId
+                        },
+                    });
+                } else {
+                    //create
+                    await db.Doctor_Infor.create({
+                        doctorId: inputData.doctorId,
+                        priceId: inputData.selectedPrice,
+                        provinceId: inputData.selectedProvince,
+                        paymentId: inputData.selectedPayment,
+                        nameClinic: inputData.nameClinic,
+                        addressClinic: inputData.addressClinic,
+                        note: inputData.note ? inputData.note : '',
+                    });
+                }
+                resolve({
+                    message: "Đã chỉnh sửa hoặc lưu thành công",
+                    errCode: 0
+                });
             }
         } catch (error) {
             reject(error);
@@ -127,30 +161,35 @@ export const getDetailDoctorById = (idFromRequestQueryId) => {
                     include: [
                         { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
                         { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
-                        { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+                        {
+                            model: db.Doctor_Infor,
+                            attributes: {
+                                exclude: ['id', 'doctorId']
+                            },
+                            include: [
+                                { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
+                            ]
+                        }
                     ],
                     raw: true,
                     nest: true,
                 });
 
-
-                if (!doctorFromDBById) {
-                    resolve({
-                        errCode: 0,
-                        message: 'Đã nhận id nhưng ko tìm thấy user này trong data , id có khả năng ko có trong data',
-                        data: {}
-                    })
-                }
-
                 if (doctorFromDBById && doctorFromDBById.image) {
                     doctorFromDBById.image = new Buffer(doctorFromDBById.image, 'base64').toString('binary');
-
-                    resolve({
-                        errCode: 0,
-                        message: `Tìm thấy doctor tại id  ${idFromRequestQueryId}`,
-                        data: doctorFromDBById
-                    });
                 }
+
+                if (!doctorFromDBById) {
+                    doctorFromDBById = {}
+                }
+
+                resolve({
+                    errCode: 0,
+                    message: 'Thành công lấy doctor by id!',
+                    data: doctorFromDBById
+                })
             }
         } catch (error) {
             console.log("Lỗi tại doctor service", error);
@@ -179,20 +218,25 @@ export const bulkCreateSchedule = (inputData) => {
                     let existing = await db.Schedule.findAll({
                         where: { doctorId: inputData.doctorId, date: inputData.date },
                         attributes: ['timeType', 'date', 'doctorId', 'maxNumber'],
-                        raw: true
+                        include: [
+                            { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
+                        ],
+                        raw: true,
+                        nest: true,
                     });
+                    // console.log('Exis : ', existing);
 
                     // convert date 
-                    if (existing && existing.length > 0) {
-                        existing = existing.map(item => {
-                            item.date = new Date(item.date).getTime();
-                            return item;
-                        });
-                    }
+                    // if (existing && existing.length > 0) {
+                    //     existing = existing.map(item => {
+                    //         item.date = new Date(item.date).getTime();
+                    //         return item;
+                    //     });
+                    // }
 
                     // compare different 
                     let toCreate = _.differenceWith(schedule, existing, (a, b) => {
-                        return a.timeType === b.timeType && a.date === b.date;
+                        return a.timeType.toString() === b.timeType.toString() && a.date.toString() === b.date.toString();
                     });
 
                     // console.log('Khác biệt : ', toCreate);
@@ -217,10 +261,97 @@ export const bulkCreateSchedule = (inputData) => {
     });
 }
 
+export const getScheduleDoctorByDate = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId || !date) {
+                resolve({
+                    errCode: 1,
+                    message: 'Ko đủ tham số query trên url'
+                });
+            } else {
+                let dataSchedule = await db.Schedule.findAll({
+                    where: {
+                        doctorId: doctorId,
+                        date: date
+                    },
+                    include: [
+                        {
+                            model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi']
+                        }
+                    ],
+                    raw: false,
+                    nest: true
+                });
+
+                if (!dataSchedule) {
+                    dataSchedule = [];
+                    resolve({
+                        errCode: 0,
+                        message: 'Ko tìm thấy dữ liệu trong scheduel tương ứng doctorId và date, nên trả ra mảng rỗng để điền vào ',
+                        data: dataSchedule
+                    });
+                } else {
+                    resolve({
+                        errCode: 0,
+                        message: 'Trả ra data schedule',
+                        data: dataSchedule
+                    });
+                }
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export const getExtraInforDoctorById = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 0,
+                    message: 'Ko có doctor id truyền vào từ tham số trên client',
+                });
+            } else {
+                let data = await db.Doctor_Infor.findOne({
+                    where: {
+                        doctorId: doctorId
+                    },
+                    attributes: {
+                        exclude: ['id', 'doctorId']
+                    },
+                    include: [
+                        { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
+                    ],
+                    raw: false,
+                    nest: true
+                });
+
+                if (!data) {
+                    data = {};
+                }
+
+                resolve({
+                    errCode: 0,
+                    message: 'Thành công lấy được doctor by doctor id',
+                    data: data
+                });
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctor: getAllDoctor,
     saveInforDoctor: saveInforDoctor,
     getDetailDoctorById: getDetailDoctorById,
-    bulkCreateSchedule: bulkCreateSchedule
+    bulkCreateSchedule: bulkCreateSchedule,
+    getScheduleDoctorByDate: getScheduleDoctorByDate,
+    getExtraInforDoctorById: getExtraInforDoctorById
 }
