@@ -346,6 +346,63 @@ export const getExtraInforDoctorById = (doctorId) => {
     });
 }
 
+
+export const getProfileDoctorById = (doctorId)=>{
+    return new Promise(async(resolve, reject)=>{
+        try {
+            if(!doctorId){
+                resolve({
+                    errCode : -1 , 
+                    message : 'Thiếu tham số req body truyền từ client!'
+                });
+            }else{
+                let doctor = await db.User.findOne({
+                    where: {
+                        id: doctorId
+                    },
+                    attributes: {
+                        exclude: ['password']
+                    },
+                    include: [
+                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
+                        { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                        {
+                            model: db.Doctor_Infor,
+                            attributes: {
+                                exclude: ['id', 'doctorId']
+                            },
+                            include: [
+                                { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
+                            ]
+                        }
+                    ],
+                    raw: true,
+                    nest: true,
+                });
+
+                if (doctor && doctor.image) {
+                    doctor.image = new Buffer(doctor.image, 'base64').toString('binary');
+                }
+
+                if (!doctor) {
+                    doctor = {}
+                }
+
+                resolve({
+                    errCode: 0,
+                    message: 'Thành công lấy doctor infor by id!',
+                    data: doctor
+                })
+            }
+
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctor: getAllDoctor,
@@ -353,5 +410,6 @@ module.exports = {
     getDetailDoctorById: getDetailDoctorById,
     bulkCreateSchedule: bulkCreateSchedule,
     getScheduleDoctorByDate: getScheduleDoctorByDate,
-    getExtraInforDoctorById: getExtraInforDoctorById
+    getExtraInforDoctorById: getExtraInforDoctorById , 
+    getProfileDoctorById  :getProfileDoctorById
 }

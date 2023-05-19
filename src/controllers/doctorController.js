@@ -98,6 +98,19 @@ let handleGetExtraInforDoctorById = async(req, res) => {
     }
 }
 
+let handleGetProfileDoctorById = async(req, res) => {
+    try{
+        let response = await doctorService.getProfileDoctorById(req.query.doctorId);
+        return res.status(200).json(response);
+    }catch(error){
+        console.log(error);
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm handleGetProfileDoctorById file doctorController trên server!'
+        });
+    }
+}
+
 
 module.exports = {
     handleGetTopDoctorHome : handleGetTopDoctorHome , 
@@ -106,5 +119,6 @@ module.exports = {
     handleGetDetailDoctorById : handleGetDetailDoctorById , 
     handleBulkCreateSchedule : handleBulkCreateSchedule,
     handleGetScheduleDoctorByDate : handleGetScheduleDoctorByDate , 
-    handleGetExtraInforDoctorById  :handleGetExtraInforDoctorById
+    handleGetExtraInforDoctorById  :handleGetExtraInforDoctorById , 
+    handleGetProfileDoctorById : handleGetProfileDoctorById
 }
