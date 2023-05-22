@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
         doctorId : DataTypes.INTEGER , // id của bảng user
         patientId : DataTypes.INTEGER ,
         timeType : DataTypes.STRING ,
-        date : DataTypes.STRING
+        date : DataTypes.STRING,
+        token : DataTypes.STRING
     }, {
         sequelize,
         modelName: 'Booking',

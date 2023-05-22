@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     Specialty.init({
         name : DataTypes.STRING , 
         image: DataTypes.STRING,
-        description : DataTypes.TEXT , 
+        descriptionHTML : DataTypes.TEXT,
+        descriptionMarkdown : DataTypes.TEXT,
         specific : DataTypes.TEXT , // cái này để ghi chi tiết hơn
     }, {
         sequelize,

@@ -276,9 +276,10 @@ export const getScheduleDoctorByDate = (doctorId, date) => {
                         date: date
                     },
                     include: [
-                        {
-                            model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi']
-                        }
+                        {model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi']},
+                        {model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName']},
+                        // this is the model fisst to the database connection in the produccer , and the model at here is 
+                        // the third relationship 1- n : 
                     ],
                     raw: false,
                     nest: true
