@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         descriptionMarkdownEnglish : DataTypes.TEXT,
         image: DataTypes.STRING,
         specific : DataTypes.TEXT , // cái này để ghi chi tiết hơn
+
+        
     }, {
         sequelize,
         modelName: 'Specialty',
