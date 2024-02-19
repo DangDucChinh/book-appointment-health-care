@@ -11,10 +11,13 @@ module.exports = (sequelize, DataTypes) => {
     Markdown.init({
         contentHTML : DataTypes.TEXT('long') , 
         contentMarkdown: DataTypes.TEXT('long'),
+        contentHTMLEnglish : DataTypes.TEXT('long') , 
+        contentMarkdownEnglish : DataTypes.TEXT('long'),
         doctorId: DataTypes.INTEGER,
         specialtyId : DataTypes.INTEGER,
         clinicId : DataTypes.INTEGER,
-        description : DataTypes.TEXT('long')
+        description : DataTypes.TEXT('long'), 
+        descriptionEnglish : DataTypes.TEXT('long')
     }, {
         sequelize,
         modelName: 'Markdown',

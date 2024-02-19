@@ -13,6 +13,10 @@ module.exports = {
             date: { type: Sequelize.STRING },
             timeType: { type: Sequelize.STRING },
             doctorId: { type: Sequelize.INTEGER },
+            isAvailable : {
+                type : Sequelize.BOOLEAN , 
+                defaultValue : true
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

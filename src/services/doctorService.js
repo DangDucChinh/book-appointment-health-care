@@ -64,11 +64,12 @@ let getAllDoctor = () => {
 let saveInforDoctor = async (inputData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!inputData.doctorId || !inputData.contentHTML || !inputData.contentMarkdown || !inputData.action
-                || !inputData.selectedPrice || !inputData.selectedPayment || !inputData.selectedProvince
-                || !inputData.nameClinic || !inputData.addressClinic) {
+            let checkObj = checkRequiredFields(inputData);
+            console.log('input nạp : ', inputData);
+
+            if (checkObj.isValid === false) {
                 resolve({
-                    message: "Ko truyền đủ tham số : doctorId ,contentHTML hoặc contentMarkdown",
+                    message: `Missing parameter ${checkObj.element}!`,
                     errCode: 1
                 });
             } else {
@@ -79,13 +80,26 @@ let saveInforDoctor = async (inputData) => {
                         doctorId: inputData.doctorId,
                         contentHTML: inputData.contentHTML,
                         contentMarkdown: inputData.contentMarkdown,
-                        description: inputData.description
+                        description: inputData.description,
+                        // BUGG
+                        contentHTMLEnglish: inputData.contentHTMLEnglish,
+                        contentMarkdownEnglish: inputData.contentMarkdownEnglish,
+                        descriptionEnglish: inputData.descriptionEnglish,
+                        //
+
                     });
                 } else if (inputData.action === 'EDIT') {
                     await db.Markdown.update({
                         contentHTML: inputData.contentHTML,
                         contentMarkdown: inputData.contentMarkdown,
                         description: inputData.description,
+                        // BUGG
+                        contentHTMLEnglish: inputData.contentHTMLEnglish,
+                        contentMarkdownEnglish: inputData.contentMarkdownEnglish,
+                        descriptionEnglish: inputData.descriptionEnglish,
+                        // clinicId : inputData.clinicId,
+                        // specialtyId : inputData.specialtyId,
+                        //
                         updateAt: new Date()
                     }, {
                         where: {
@@ -95,7 +109,7 @@ let saveInforDoctor = async (inputData) => {
                 }
 
                 ///
-                // update - insert beside markdown 
+                // update - insert Doctor additional information 
                 let doctorInfor = await db.Doctor_Infor.findOne({
                     where: {
                         doctorId: inputData.doctorId
@@ -112,7 +126,10 @@ let saveInforDoctor = async (inputData) => {
                         paymentId: inputData.selectedPayment,
                         nameClinic: inputData.nameClinic,
                         addressClinic: inputData.addressClinic,
-                        note: inputData.note ? inputData.note : '',
+                        note: inputData.note,
+
+                        specialtyId: inputData.specialtyId,
+                        clinicId: inputData.clinicId,
                         updateAt: new Date()
                     }, {
                         where: {
@@ -129,6 +146,8 @@ let saveInforDoctor = async (inputData) => {
                         nameClinic: inputData.nameClinic,
                         addressClinic: inputData.addressClinic,
                         note: inputData.note ? inputData.note : '',
+                        specialtyId: inputData.specialtyId,
+                        clinicId: inputData.clinicId,
                     });
                 }
                 resolve({
@@ -159,7 +178,7 @@ export const getDetailDoctorById = (idFromRequestQueryId) => {
                         exclude: ['password']
                     },
                     include: [
-                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
+                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown', 'contentHTMLEnglish', 'contentMarkdownEnglish', 'descriptionEnglish'] },
                         { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
                         {
                             model: db.Doctor_Infor,
@@ -176,6 +195,8 @@ export const getDetailDoctorById = (idFromRequestQueryId) => {
                     raw: true,
                     nest: true,
                 });
+
+                // console.log('doctor z: ',doctorFromDBById);
 
                 if (doctorFromDBById && doctorFromDBById.image) {
                     doctorFromDBById.image = new Buffer(doctorFromDBById.image, 'base64').toString('binary');
@@ -273,11 +294,12 @@ export const getScheduleDoctorByDate = (doctorId, date) => {
                 let dataSchedule = await db.Schedule.findAll({
                     where: {
                         doctorId: doctorId,
-                        date: date
+                        date: date,
+                        isAvailable: true
                     },
                     include: [
-                        {model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi']},
-                        {model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName']},
+                        { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] },
                         // this is the model fisst to the database connection in the produccer , and the model at here is 
                         // the third relationship 1- n : 
                     ],
@@ -341,6 +363,10 @@ export const getExtraInforDoctorById = (doctorId) => {
                     data: data
                 });
             }
+            // the following is the error message that is the display 
+            // the is the interact the error message that the interact
+
+            // the intertract inthe the error message that the 
         } catch (error) {
             reject(error);
         }
@@ -348,15 +374,15 @@ export const getExtraInforDoctorById = (doctorId) => {
 }
 
 
-export const getProfileDoctorById = (doctorId)=>{
-    return new Promise(async(resolve, reject)=>{
+export const getProfileDoctorById = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            if(!doctorId){
+            if (!doctorId) {
                 resolve({
-                    errCode : -1 , 
-                    message : 'Thiếu tham số req body truyền từ client!'
+                    errCode: -1,
+                    message: 'Thiếu tham số req body truyền từ client!'
                 });
-            }else{
+            } else {
                 let doctor = await db.User.findOne({
                     where: {
                         id: doctorId
@@ -365,7 +391,7 @@ export const getProfileDoctorById = (doctorId)=>{
                         exclude: ['password']
                     },
                     include: [
-                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
+                        { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown','descriptionEnglish','contentHTMLEnglish','contentMarkdownEnglish'] },
                         { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
                         {
                             model: db.Doctor_Infor,
@@ -404,6 +430,79 @@ export const getProfileDoctorById = (doctorId)=>{
     })
 }
 
+///
+let checkRequiredFields = (inputData) => {
+    let arrfields = ['doctorId', 'contentHTML', 'contentMarkdown', 'action', 'selectedPrice', 'selectedPayment', 'selectedProvince',
+        'nameClinic', 'addressClinic', 'note', 'specialtyId'];
+    // let arrfields = ['doctorId', 'contentHTML', 'contentMarkdown', 'action', 'selectedPrice', 'selectedPayment', 'selectedProvince',
+    //     'nameClinic', 'addressClinic', 'note'];
+
+    let isValid = true;
+    let element = '';
+    for (let i = 0; i < arrfields.length; i++) {
+        if (!inputData[arrfields[i]]) {
+            isValid = false;
+            element = arrfields[i];
+            break;
+        }
+    }
+
+    return {
+        isValid: isValid,
+        element: element
+    }
+};
+///
+
+
+let deleteScheduleDoctorByDate = (doctorIdInput, dateInput, timeTypeInput) => { // CO
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorIdInput || !dateInput || !timeTypeInput) {
+                resolve({
+                    errCode: 1,
+                    message: 'Ko đủ tham số trên params'
+                });
+            } else {
+                let schedule = await db.Schedule.findOne({
+                    where: {
+                        doctorId: doctorIdInput,
+                        date: dateInput,
+                        timeType: timeTypeInput
+                    }
+                });
+
+                console.log('lịch đó : ', schedule);
+                if (schedule) {
+                    await db.Schedule.update({
+                        isAvailable: false
+                    },
+                        {
+                            where: {
+                                doctorId: doctorIdInput,
+                                date: dateInput,
+                                timeType: timeTypeInput
+                            },
+                            raw: false
+                        });
+                    resolve({
+                        errCode: 0,
+                        message: 'Đã tìm thấy lịch đó và thay đổi isAvailable cho nó !',
+                    });
+                } else {
+                    resolve({
+                        errCode: 0,
+                        message: 'Ko tìm thấy bản ghi thích hợp doctorId ,date và timeType trong database!',
+                    });
+                }
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctor: getAllDoctor,
@@ -411,6 +510,7 @@ module.exports = {
     getDetailDoctorById: getDetailDoctorById,
     bulkCreateSchedule: bulkCreateSchedule,
     getScheduleDoctorByDate: getScheduleDoctorByDate,
-    getExtraInforDoctorById: getExtraInforDoctorById , 
-    getProfileDoctorById  :getProfileDoctorById
+    getExtraInforDoctorById: getExtraInforDoctorById,
+    getProfileDoctorById: getProfileDoctorById,
+    deleteScheduleDoctorByDate: deleteScheduleDoctorByDate
 }

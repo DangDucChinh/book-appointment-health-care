@@ -11,12 +11,15 @@ let buildUrlEmail = (doctorId, token) => {
 let postBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
+            console.log('\nxác nhận khám đang đây 1 ');
             if (!data.email || !data.doctorId || !data.timeType || !data.date || !data.fullName || !data.timeString) {
                 resolve({
                     errCode: 1,
                     message: 'Thiếu hụt tham số truyền vào'
                 });
             } else {
+            console.log('\nxác nhận khám đang đây 2 ');
+
 
                 let token = uuidv4();
 
@@ -43,6 +46,8 @@ let postBookAppointment = (data) => {
                 });
 
                 if (user && user[0]) {
+            console.log('\nxác nhận khám đang đây 4 \n ', user , );
+
                     await db.Booking.findOrCreate({
                         where: { patientId: user[0].id },
                         defaults: {
@@ -104,7 +109,7 @@ let postVerifyBookAppointment = (data) => {
             }
 
         } catch (error) {
-            console.log('Lỗi từ server patient service!', error);
+            console.log('Lỗi từ server patient service! : +++  ', error);
             reject(error);
         }
     });

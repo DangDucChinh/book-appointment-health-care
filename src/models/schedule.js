@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         date: DataTypes.STRING,
         timeType: DataTypes.STRING,
         doctorId: DataTypes.INTEGER,
+        isAvailable: DataTypes.BOOLEAN
     }, {
         sequelize,
         modelName: 'Schedule',

@@ -9,9 +9,12 @@ module.exports = (sequelize, DataTypes) => {
     };
     Specialty.init({
         name : DataTypes.STRING , 
-        image: DataTypes.STRING,
         descriptionHTML : DataTypes.TEXT,
         descriptionMarkdown : DataTypes.TEXT,
+        nameEnglish : DataTypes.STRING,
+        descriptionHTMLEnglish : DataTypes.TEXT,
+        descriptionMarkdownEnglish : DataTypes.TEXT,
+        image: DataTypes.STRING,
         specific : DataTypes.TEXT , // cái này để ghi chi tiết hơn
     }, {
         sequelize,

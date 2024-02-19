@@ -17,6 +17,10 @@ module.exports = {
             nameClinic: { type: Sequelize.STRING, allowNull: false, },
             note: { type: Sequelize.STRING },
             count: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
+
+            specialtyId : {type : Sequelize.INTEGER, allowNull: true} ,
+            clinicId : {type : Sequelize.INTEGER, allowNull: true} ,
+            
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

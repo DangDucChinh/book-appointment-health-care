@@ -111,6 +111,19 @@ let handleGetProfileDoctorById = async(req, res) => {
     }
 }
 
+let handleDeleteScheduleDoctorByDate = async (req , res)=>{
+    try{
+        let response = await doctorService.deleteScheduleDoctorByDate(req.query.doctorId, req.query.date, req.query.timeType);
+        return res.status(200).json(response)
+    }catch(error){
+        console.log(error);
+        return res.status(200).json({
+            errCode : -1 , 
+            message  :'Lỗi tại hàm handleGetProfileDoctorById file doctorController trên server!'
+        });
+    }
+}
+
 
 module.exports = {
     handleGetTopDoctorHome : handleGetTopDoctorHome , 
@@ -120,5 +133,6 @@ module.exports = {
     handleBulkCreateSchedule : handleBulkCreateSchedule,
     handleGetScheduleDoctorByDate : handleGetScheduleDoctorByDate , 
     handleGetExtraInforDoctorById  :handleGetExtraInforDoctorById , 
-    handleGetProfileDoctorById : handleGetProfileDoctorById
+    handleGetProfileDoctorById : handleGetProfileDoctorById , 
+    handleDeleteScheduleDoctorByDate : handleDeleteScheduleDoctorByDate , 
 }

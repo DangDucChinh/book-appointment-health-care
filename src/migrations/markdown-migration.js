@@ -12,8 +12,16 @@ module.exports = {
                 allowNull: false,
                 type: Sequelize.TEXT('long')
             },
+            contentHTMLEnglish : {
+                allowNull: true,
+                type: Sequelize.TEXT('long')
+            },
             contentMarkdown: {
                 allowNull: false,
+                type: Sequelize.TEXT('long')
+            },
+            contentMarkdownEnglish : {
+                allowNull: true,
                 type: Sequelize.TEXT('long')
             },
             doctorId: {
@@ -30,6 +38,10 @@ module.exports = {
             },
             description: {
                 allowNull: true,
+                type: Sequelize.TEXT('long')
+            },
+            descriptionEnglish :  {
+                allowNull: false,
                 type: Sequelize.TEXT('long')
             },
             createdAt: {

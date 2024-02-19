@@ -80,7 +80,6 @@ let getAllUser = (userId) => {
                 });
             }
 
-
             resolve(users);
         } catch (err) {
             reject(err);
@@ -241,7 +240,7 @@ let updateUserAPIGetUser = (userFromObjReqBody) => {
                             positionId: userFromObjReqBody.positionId,
                             roleId: userFromObjReqBody.roleId,
                             phoneNumber: userFromObjReqBody.phoneNumber,
-                            image : userFromObjReqBody.avatar
+                            image: userFromObjReqBody.avatar
                         },
                         { where: { id: userFromObjReqBody.id } }
                     );
@@ -268,23 +267,26 @@ let getAllCodes = (typeInput) => { // console.log(typeInput)
             } else {
                 let allcodes = await db.Allcode.findAll({
                     where: {
-                        type: typeInput
+                        type: typeInput 
                         // typeInput là khi đăng nhập, chúng ta giữ type của người đó (admin, doctor , patient ), khi chạy hàm này 
                         // typeInput tương ứng tài khoản nào thì lấy ra data type đó . 
                     }
                 });
 
                 if (allcodes.length === 0) {
-                    response.errCode = 0;
-                    response.message = 'Vào được database lấy allcode nhưng type ko có kiểu đó !';
+                    resolve({
+                        errCode: 0,
+                        message: 'Vào được database lấy allcode nhưng type ko có kiểu đó !',
+                        dataAllCodes: []
+                    });
                 } else {
-                    response.errCode = 0;
-                    response.message = 'Thành công lấy được data allcodes';
-                    response.dataAllCodes = allcodes;
+                    resolve({
+                        errCode: 0,
+                        message: 'Thành công lấy được data allcodes',
+                        dataAllCodes: allcodes
+                    });
                 }
             }
-
-            resolve(response);
 
         } catch (error) {
             reject(error);
@@ -302,3 +304,7 @@ module.exports = {
     getAllCodes: getAllCodes,
     updateUserAPIGetUser: updateUserAPIGetUser
 }
+
+///////
+
+///////
